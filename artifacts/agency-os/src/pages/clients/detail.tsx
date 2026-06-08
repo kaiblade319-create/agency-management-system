@@ -42,7 +42,7 @@ export default function ClientDetailPage({ id }: { id: string }) {
     return (
       <div className="p-6">
         <p className="text-muted-foreground">Client not found.</p>
-        <Link href="/clients"><a className="text-primary text-sm mt-2 inline-block">Back to Clients</a></Link>
+        <Link href="/clients" className="text-primary text-sm mt-2 inline-block">Back to Clients</Link>
       </div>
     );
   }
@@ -59,10 +59,8 @@ export default function ClientDetailPage({ id }: { id: string }) {
     <div className="p-6 space-y-6 animated-fade-in">
       {/* Back + header */}
       <div>
-        <Link href="/clients">
-          <a className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-3 w-fit">
-            <ArrowLeft className="h-3.5 w-3.5" /> Back to Clients
-          </a>
+        <Link href="/clients" className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-3 w-fit">
+          <ArrowLeft className="h-3.5 w-3.5" /> Back to Clients
         </Link>
         <div className="flex items-start justify-between">
           <div>

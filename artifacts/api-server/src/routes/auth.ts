@@ -2,6 +2,7 @@ import { Router } from "express";
 import { db } from "@workspace/db";
 import { usersTable } from "@workspace/db/schema";
 import { eq } from "drizzle-orm";
+import { signToken } from "../lib/jwt";
 
 const router = Router();
 
@@ -12,9 +13,9 @@ router.post("/auth/login", async (req, res) => {
     if (!user || user.password !== password) {
       return res.status(401).json({ error: "Invalid credentials" });
     }
-    const token = `mock-jwt-${user.id}-${Date.now()}`;
+    const token = signToken(user.id);
     return res.json({ token, user: { id: user.id, name: user.name, email: user.email, role: user.role } });
-  } catch (err) {
+  } catch {
     return res.status(500).json({ error: "Internal error" });
   }
 });
