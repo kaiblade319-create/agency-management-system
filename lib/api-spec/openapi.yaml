@@ -1,22 +1,31 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: AgencyOS API
 servers:
   - url: /api
-    description: Base API path
 tags:
   - name: health
-    description: Health operations
+  - name: auth
+  - name: clients
+  - name: leads
+  - name: projects
+  - name: tasks
+  - name: content
+  - name: invoices
+  - name: quotations
+  - name: proposals
+  - name: users
+  - name: dashboard
+  - name: settings
+
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,13 +33,1327 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginInput"
+      responses:
+        "200":
+          description: Auth token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+
+  /clients:
+    get:
+      operationId: listClients
+      tags: [clients]
+      summary: List clients
+      parameters:
+        - in: query
+          name: search
+          schema:
+            type: string
+        - in: query
+          name: category
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Clients list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Client"
+    post:
+      operationId: createClient
+      tags: [clients]
+      summary: Create client
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ClientInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Client"
+
+  /clients/{id}:
+    get:
+      operationId: getClient
+      tags: [clients]
+      summary: Get client
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Client
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Client"
+    patch:
+      operationId: updateClient
+      tags: [clients]
+      summary: Update client
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ClientInput"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Client"
+    delete:
+      operationId: deleteClient
+      tags: [clients]
+      summary: Delete client
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+
+  /clients/{id}/contracts:
+    get:
+      operationId: getClientContracts
+      tags: [clients]
+      summary: Get client contracts
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Contracts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Contract"
+
+  /leads:
+    get:
+      operationId: listLeads
+      tags: [leads]
+      summary: List leads
+      responses:
+        "200":
+          description: Leads
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Lead"
+    post:
+      operationId: createLead
+      tags: [leads]
+      summary: Create lead
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LeadInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Lead"
+
+  /leads/pipeline-summary:
+    get:
+      operationId: getPipelineSummary
+      tags: [leads]
+      summary: Pipeline summary
+      responses:
+        "200":
+          description: Summary
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PipelineStageSummary"
+
+  /leads/{id}:
+    patch:
+      operationId: updateLead
+      tags: [leads]
+      summary: Update lead
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LeadInput"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Lead"
+    delete:
+      operationId: deleteLead
+      tags: [leads]
+      summary: Delete lead
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+
+  /projects:
+    get:
+      operationId: listProjects
+      tags: [projects]
+      summary: List projects
+      responses:
+        "200":
+          description: Projects
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Project"
+    post:
+      operationId: createProject
+      tags: [projects]
+      summary: Create project
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProjectInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Project"
+
+  /projects/{id}:
+    patch:
+      operationId: updateProject
+      tags: [projects]
+      summary: Update project
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProjectInput"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Project"
+    delete:
+      operationId: deleteProject
+      tags: [projects]
+      summary: Delete project
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+
+  /tasks:
+    get:
+      operationId: listTasks
+      tags: [tasks]
+      summary: List tasks
+      responses:
+        "200":
+          description: Tasks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Task"
+    post:
+      operationId: createTask
+      tags: [tasks]
+      summary: Create task
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TaskInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+
+  /tasks/{id}:
+    patch:
+      operationId: updateTask
+      tags: [tasks]
+      summary: Update task
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TaskInput"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+    delete:
+      operationId: deleteTask
+      tags: [tasks]
+      summary: Delete task
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+
+  /content-posts:
+    get:
+      operationId: listContentPosts
+      tags: [content]
+      summary: List content posts
+      parameters:
+        - in: query
+          name: clientId
+          schema:
+            type: string
+        - in: query
+          name: month
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Posts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ContentPost"
+    post:
+      operationId: createContentPost
+      tags: [content]
+      summary: Create content post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ContentPostInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContentPost"
+
+  /content-posts/{id}:
+    patch:
+      operationId: updateContentPost
+      tags: [content]
+      summary: Update content post
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ContentPostInput"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContentPost"
+    delete:
+      operationId: deleteContentPost
+      tags: [content]
+      summary: Delete content post
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+
+  /invoices:
+    get:
+      operationId: listInvoices
+      tags: [invoices]
+      summary: List invoices
+      responses:
+        "200":
+          description: Invoices
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Invoice"
+    post:
+      operationId: createInvoice
+      tags: [invoices]
+      summary: Create invoice
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InvoiceInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Invoice"
+
+  /invoices/financial-summary:
+    get:
+      operationId: getFinancialSummary
+      tags: [invoices]
+      summary: Financial summary
+      responses:
+        "200":
+          description: Summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FinancialSummary"
+
+  /invoices/{id}:
+    patch:
+      operationId: updateInvoice
+      tags: [invoices]
+      summary: Update invoice
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InvoiceInput"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Invoice"
+    delete:
+      operationId: deleteInvoice
+      tags: [invoices]
+      summary: Delete invoice
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+
+  /quotations:
+    get:
+      operationId: listQuotations
+      tags: [quotations]
+      summary: List quotations
+      responses:
+        "200":
+          description: Quotations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Quotation"
+    post:
+      operationId: createQuotation
+      tags: [quotations]
+      summary: Create quotation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/QuotationInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Quotation"
+
+  /quotations/{id}:
+    patch:
+      operationId: updateQuotation
+      tags: [quotations]
+      summary: Update quotation
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/QuotationInput"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Quotation"
+    delete:
+      operationId: deleteQuotation
+      tags: [quotations]
+      summary: Delete quotation
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+
+  /quotations/{id}/convert-to-invoice:
+    post:
+      operationId: convertQuotationToInvoice
+      tags: [quotations]
+      summary: Convert quotation to invoice
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "201":
+          description: Invoice created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Invoice"
+
+  /proposals:
+    get:
+      operationId: listProposals
+      tags: [proposals]
+      summary: List proposals
+      responses:
+        "200":
+          description: Proposals
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Proposal"
+    post:
+      operationId: createProposal
+      tags: [proposals]
+      summary: Create proposal
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProposalInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Proposal"
+
+  /proposals/{id}:
+    patch:
+      operationId: updateProposal
+      tags: [proposals]
+      summary: Update proposal
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProposalInput"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Proposal"
+    delete:
+      operationId: deleteProposal
+      tags: [proposals]
+      summary: Delete proposal
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+
+  /users:
+    get:
+      operationId: listUsers
+      tags: [users]
+      summary: List users
+      responses:
+        "200":
+          description: Users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+    post:
+      operationId: createUser
+      tags: [users]
+      summary: Create user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+
+  /users/{id}:
+    patch:
+      operationId: updateUser
+      tags: [users]
+      summary: Update user
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserInput"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+    delete:
+      operationId: deleteUser
+      tags: [users]
+      summary: Delete user
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+
+  /dashboard/stats:
+    get:
+      operationId: getDashboardStats
+      tags: [dashboard]
+      summary: Dashboard stats
+      responses:
+        "200":
+          description: Stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardStats"
+
+  /dashboard/revenue-chart:
+    get:
+      operationId: getRevenueChart
+      tags: [dashboard]
+      summary: Revenue chart data
+      responses:
+        "200":
+          description: Chart data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RevenueDataPoint"
+
+  /dashboard/recent-activity:
+    get:
+      operationId: getRecentActivity
+      tags: [dashboard]
+      summary: Recent activity
+      responses:
+        "200":
+          description: Activity
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ActivityItem"
+
 components:
   schemas:
     HealthStatus:
       type: object
+      required: [status]
       properties:
         status:
           type: string
-      required:
-        - status
 
+    LoginInput:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+
+    AuthResponse:
+      type: object
+      required: [token, user]
+      properties:
+        token:
+          type: string
+        user:
+          $ref: "#/components/schemas/User"
+
+    User:
+      type: object
+      required: [id, name, email, role]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+        isActive:
+          type: ["boolean", "null"]
+
+    UserInput:
+      type: object
+      required: [name, email, role]
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+        password:
+          type: ["string", "null"]
+        isActive:
+          type: ["boolean", "null"]
+
+    Client:
+      type: object
+      required: [id, companyName]
+      properties:
+        id:
+          type: string
+        companyName:
+          type: string
+        contactPerson:
+          type: ["string", "null"]
+        phone:
+          type: ["string", "null"]
+        email:
+          type: ["string", "null"]
+        category:
+          type: ["string", "null"]
+        health:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+        serviceType:
+          type: ["string", "null"]
+        serviceDetails:
+          type: ["string", "null"]
+        socialHandles:
+          type: ["string", "null"]
+        websiteUrl:
+          type: ["string", "null"]
+        contentFrequency:
+          type: ["string", "null"]
+        targetAudience:
+          type: ["string", "null"]
+
+    ClientInput:
+      type: object
+      required: [companyName]
+      properties:
+        companyName:
+          type: string
+        contactPerson:
+          type: ["string", "null"]
+        phone:
+          type: ["string", "null"]
+        email:
+          type: ["string", "null"]
+        category:
+          type: ["string", "null"]
+        health:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+        serviceType:
+          type: ["string", "null"]
+        serviceDetails:
+          type: ["string", "null"]
+        socialHandles:
+          type: ["string", "null"]
+        websiteUrl:
+          type: ["string", "null"]
+        contentFrequency:
+          type: ["string", "null"]
+        targetAudience:
+          type: ["string", "null"]
+
+    Contract:
+      type: object
+      required: [id]
+      properties:
+        id:
+          type: string
+        title:
+          type: ["string", "null"]
+        status:
+          type: ["string", "null"]
+        value:
+          type: ["number", "null"]
+        startDate:
+          type: ["string", "null"]
+        endDate:
+          type: ["string", "null"]
+
+    Lead:
+      type: object
+      required: [id, title, stage]
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        stage:
+          type: string
+        companyName:
+          type: ["string", "null"]
+        contactName:
+          type: ["string", "null"]
+        email:
+          type: ["string", "null"]
+        value:
+          type: ["number", "null"]
+        daysInStage:
+          type: ["integer", "null"]
+
+    LeadInput:
+      type: object
+      required: [title]
+      properties:
+        title:
+          type: string
+        stage:
+          type: ["string", "null"]
+        companyName:
+          type: ["string", "null"]
+        contactName:
+          type: ["string", "null"]
+        email:
+          type: ["string", "null"]
+        value:
+          type: ["number", "null"]
+
+    PipelineStageSummary:
+      type: object
+      required: [stage]
+      properties:
+        stage:
+          type: string
+        count:
+          type: ["integer", "null"]
+        totalValue:
+          type: ["number", "null"]
+
+    Project:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        status:
+          type: ["string", "null"]
+        priority:
+          type: ["string", "null"]
+        clientId:
+          type: ["string", "null"]
+        clientName:
+          type: ["string", "null"]
+        startDate:
+          type: ["string", "null"]
+        dueDate:
+          type: ["string", "null"]
+        description:
+          type: ["string", "null"]
+
+    ProjectInput:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+        status:
+          type: ["string", "null"]
+        priority:
+          type: ["string", "null"]
+        clientId:
+          type: ["string", "null"]
+        startDate:
+          type: ["string", "null"]
+        dueDate:
+          type: ["string", "null"]
+        description:
+          type: ["string", "null"]
+
+    Task:
+      type: object
+      required: [id, title]
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        status:
+          type: ["string", "null"]
+        priority:
+          type: ["string", "null"]
+        projectId:
+          type: ["string", "null"]
+        projectName:
+          type: ["string", "null"]
+        assigneeId:
+          type: ["string", "null"]
+        assigneeName:
+          type: ["string", "null"]
+        dueDate:
+          type: ["string", "null"]
+        description:
+          type: ["string", "null"]
+
+    TaskInput:
+      type: object
+      required: [title]
+      properties:
+        title:
+          type: string
+        status:
+          type: ["string", "null"]
+        priority:
+          type: ["string", "null"]
+        projectId:
+          type: ["string", "null"]
+        assigneeId:
+          type: ["string", "null"]
+        dueDate:
+          type: ["string", "null"]
+        description:
+          type: ["string", "null"]
+
+    ContentPost:
+      type: object
+      required: [id]
+      properties:
+        id:
+          type: string
+        platform:
+          type: ["string", "null"]
+        contentType:
+          type: ["string", "null"]
+        status:
+          type: ["string", "null"]
+        caption:
+          type: ["string", "null"]
+        scheduledAt:
+          type: ["string", "null"]
+        clientId:
+          type: ["string", "null"]
+        clientName:
+          type: ["string", "null"]
+
+    ContentPostInput:
+      type: object
+      properties:
+        platform:
+          type: ["string", "null"]
+        contentType:
+          type: ["string", "null"]
+        status:
+          type: ["string", "null"]
+        caption:
+          type: ["string", "null"]
+        scheduledAt:
+          type: ["string", "null"]
+        clientId:
+          type: ["string", "null"]
+
+    Invoice:
+      type: object
+      required: [id]
+      properties:
+        id:
+          type: string
+        number:
+          type: ["string", "null"]
+        clientId:
+          type: ["string", "null"]
+        clientName:
+          type: ["string", "null"]
+        status:
+          type: ["string", "null"]
+        invoiceDate:
+          type: ["string", "null"]
+        dueDate:
+          type: ["string", "null"]
+        subtotal:
+          type: ["number", "null"]
+        taxAmount:
+          type: ["number", "null"]
+        total:
+          type: ["number", "null"]
+        notes:
+          type: ["string", "null"]
+        lineItems:
+          type: ["array", "null"]
+          items:
+            $ref: "#/components/schemas/LineItem"
+
+    InvoiceInput:
+      type: object
+      properties:
+        clientId:
+          type: ["string", "null"]
+        status:
+          type: ["string", "null"]
+        invoiceDate:
+          type: ["string", "null"]
+        dueDate:
+          type: ["string", "null"]
+        subtotal:
+          type: ["number", "null"]
+        taxAmount:
+          type: ["number", "null"]
+        total:
+          type: ["number", "null"]
+        notes:
+          type: ["string", "null"]
+        lineItems:
+          type: ["array", "null"]
+          items:
+            $ref: "#/components/schemas/LineItem"
+
+    LineItem:
+      type: object
+      properties:
+        description:
+          type: string
+        qty:
+          type: number
+        unitPrice:
+          type: number
+        taxPercent:
+          type: number
+
+    FinancialSummary:
+      type: object
+      properties:
+        totalRevenue:
+          type: ["number", "null"]
+        outstanding:
+          type: ["number", "null"]
+        overdue:
+          type: ["number", "null"]
+        paidCount:
+          type: ["integer", "null"]
+        invoiceCount:
+          type: ["integer", "null"]
+
+    Quotation:
+      type: object
+      required: [id]
+      properties:
+        id:
+          type: string
+        number:
+          type: ["string", "null"]
+        clientId:
+          type: ["string", "null"]
+        clientName:
+          type: ["string", "null"]
+        status:
+          type: ["string", "null"]
+        validUntil:
+          type: ["string", "null"]
+        subtotal:
+          type: ["number", "null"]
+        taxAmount:
+          type: ["number", "null"]
+        total:
+          type: ["number", "null"]
+        notes:
+          type: ["string", "null"]
+        lineItems:
+          type: ["array", "null"]
+          items:
+            $ref: "#/components/schemas/LineItem"
+
+    QuotationInput:
+      type: object
+      properties:
+        clientId:
+          type: ["string", "null"]
+        status:
+          type: ["string", "null"]
+        validUntil:
+          type: ["string", "null"]
+        subtotal:
+          type: ["number", "null"]
+        taxAmount:
+          type: ["number", "null"]
+        total:
+          type: ["number", "null"]
+        notes:
+          type: ["string", "null"]
+        lineItems:
+          type: ["array", "null"]
+          items:
+            $ref: "#/components/schemas/LineItem"
+
+    Proposal:
+      type: object
+      required: [id]
+      properties:
+        id:
+          type: string
+        title:
+          type: ["string", "null"]
+        clientId:
+          type: ["string", "null"]
+        clientName:
+          type: ["string", "null"]
+        status:
+          type: ["string", "null"]
+        template:
+          type: ["string", "null"]
+        value:
+          type: ["number", "null"]
+        validUntil:
+          type: ["string", "null"]
+        scope:
+          type: ["string", "null"]
+        deliverables:
+          type: ["string", "null"]
+        timeline:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+
+    ProposalInput:
+      type: object
+      properties:
+        title:
+          type: ["string", "null"]
+        clientId:
+          type: ["string", "null"]
+        status:
+          type: ["string", "null"]
+        template:
+          type: ["string", "null"]
+        value:
+          type: ["number", "null"]
+        validUntil:
+          type: ["string", "null"]
+        scope:
+          type: ["string", "null"]
+        deliverables:
+          type: ["string", "null"]
+        timeline:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+
+    DashboardStats:
+      type: object
+      properties:
+        clientCount:
+          type: ["integer", "null"]
+        activeProjects:
+          type: ["integer", "null"]
+        openLeads:
+          type: ["integer", "null"]
+        monthlyRevenue:
+          type: ["number", "null"]
+        tasksDue:
+          type: ["integer", "null"]
+
+    RevenueDataPoint:
+      type: object
+      properties:
+        month:
+          type: string
+        revenue:
+          type: number
+
+    ActivityItem:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+        message:
+          type: string
+        createdAt:
+          type: string
