@@ -1,1 +1,1 @@
-- [AgencyOS stack](agencyos-stack.md) — pnpm workspace migration; @base-ui/react needed; login: admin@agencyos.com / Admin@123
+- [AgencyOS stack](agencyos-stack.md) — pnpm workspace migration; @base-ui/react needed; wouter Link must not wrap <a>
