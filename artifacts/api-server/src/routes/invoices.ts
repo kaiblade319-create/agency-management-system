@@ -1,11 +1,9 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
 import { invoicesTable, clientsTable } from "@workspace/db/schema";
-import { eq, sql } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 
 const router = Router();
-
-let invoiceCounter = 1000;
 
 router.get("/financial-summary", async (req, res) => {
   try {
@@ -36,20 +34,41 @@ router.get("/", async (req, res) => {
         status: invoicesTable.status,
         invoiceDate: invoicesTable.invoiceDate,
         dueDate: invoicesTable.dueDate,
+        currency: invoicesTable.currency,
         subtotal: invoicesTable.subtotal,
         taxAmount: invoicesTable.taxAmount,
+        discount: invoicesTable.discount,
         total: invoicesTable.total,
+        lineItems: invoicesTable.lineItems,
         notes: invoicesTable.notes,
+        termsAndConditions: invoicesTable.termsAndConditions,
         companyGstin: invoicesTable.companyGstin,
         clientGstin: invoicesTable.clientGstin,
         billingAddress: invoicesTable.billingAddress,
         shippingAddress: invoicesTable.shippingAddress,
-        termsAndConditions: invoicesTable.termsAndConditions,
         bankDetails: invoicesTable.bankDetails,
-        lineItems: invoicesTable.lineItems,
+        logoUrl: invoicesTable.logoUrl,
+        businessName: invoicesTable.businessName,
+        businessPhone: invoicesTable.businessPhone,
+        businessEmail: invoicesTable.businessEmail,
+        businessPan: invoicesTable.businessPan,
+        businessAddress: invoicesTable.businessAddress,
+        businessCity: invoicesTable.businessCity,
+        businessPostalCode: invoicesTable.businessPostalCode,
+        businessState: invoicesTable.businessState,
+        clientPhone: invoicesTable.clientPhone,
+        clientEmail: invoicesTable.clientEmail,
+        clientPan: invoicesTable.clientPan,
+        clientCity: invoicesTable.clientCity,
+        clientPostalCode: invoicesTable.clientPostalCode,
+        clientState: invoicesTable.clientState,
+        gstType: invoicesTable.gstType,
+        signatureUrl: invoicesTable.signatureUrl,
+        discountType: invoicesTable.discountType,
       })
       .from(invoicesTable)
-      .leftJoin(clientsTable, eq(invoicesTable.clientId, clientsTable.id));
+      .leftJoin(clientsTable, eq(invoicesTable.clientId, clientsTable.id))
+      .orderBy(desc(invoicesTable.createdAt));
     return res.json(rows);
   } catch {
     return res.status(500).json({ error: "Internal error" });
@@ -58,13 +77,23 @@ router.get("/", async (req, res) => {
 
 router.post("/", async (req, res) => {
   try {
-    invoiceCounter++;
     const body = { ...req.body };
     if (!body.clientId) delete body.clientId;
-    body.number = `INV-${invoiceCounter}`;
+    // Use provided number or auto-generate
+    if (!body.number) {
+      const existing = await db.select({ number: invoicesTable.number }).from(invoicesTable);
+      const nums = existing
+        .map((r) => r.number)
+        .filter((n): n is string => !!n && n.startsWith("INV-"))
+        .map((n) => parseInt(n.replace("INV-", ""), 10))
+        .filter((n) => !isNaN(n));
+      const next = nums.length > 0 ? Math.max(...nums) + 1 : 1001;
+      body.number = `INV-${next}`;
+    }
     const [row] = await db.insert(invoicesTable).values(body).returning();
     return res.status(201).json(row);
-  } catch {
+  } catch (e) {
+    console.error(e);
     return res.status(500).json({ error: "Internal error" });
   }
 });
