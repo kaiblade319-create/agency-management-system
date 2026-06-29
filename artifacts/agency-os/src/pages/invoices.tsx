@@ -17,9 +17,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { cn } from "@/lib/utils";
 import {
   Plus, Trash2, Receipt, ArrowLeft, UploadCloud, ImageIcon, X as XIcon,
-  IndianRupee, Building2, User, FileText, Banknote,
+  IndianRupee, Building2, User, FileText, Banknote, Download,
 } from "lucide-react";
 import { format } from "date-fns";
+import { openPrintWindow, buildInvoiceHtml, type InvoiceData } from "@/lib/pdf-print";
 
 // ─── Helpers ───────────────────────────────────────────────────────────────
 
@@ -257,6 +258,14 @@ function InvoiceBuilder({ onBack, editData }: { onBack: () => void; editData?: R
         </button>
         <h1 className="font-bold font-heading text-base">{editData ? "Edit Invoice" : "New Invoice"}</h1>
         <div className="flex gap-2">
+          {editData && (
+            <Button
+              variant="outline" size="sm" className="gap-1.5"
+              onClick={() => openPrintWindow(buildInvoiceHtml(editData as InvoiceData), `Invoice-${(editData as Record<string,string>).number ?? "draft"}`)}
+            >
+              <Download className="h-3.5 w-3.5" /> PDF
+            </Button>
+          )}
           <Button variant="outline" size="sm" onClick={handleSubmit(async (d) => { d.status = "DRAFT"; await onSubmit(d as BuilderForm); })} disabled={saving}>
             Save Draft
           </Button>
@@ -777,10 +786,24 @@ export default function InvoicesPage() {
                       {currSym}{(inv.total ?? 0).toLocaleString("en-IN", { minimumFractionDigits: 2 })}
                     </td>
                     <td className="px-4 py-3" onClick={e => e.stopPropagation()}>
-                      <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive hover:text-destructive"
-                        onClick={() => deleteInvoice(inv.id)}>
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </Button>
+                      <div className="flex items-center gap-1 justify-end">
+                        <Button
+                          size="icon" variant="ghost" className="h-7 w-7"
+                          title="Download PDF"
+                          onClick={() => {
+                            openPrintWindow(
+                              buildInvoiceHtml(inv as unknown as InvoiceData),
+                              `Invoice-${inv.number ?? "draft"}`
+                            );
+                          }}
+                        >
+                          <Download className="h-3.5 w-3.5" />
+                        </Button>
+                        <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive hover:text-destructive"
+                          onClick={() => deleteInvoice(inv.id)}>
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
                     </td>
                   </tr>
                 );

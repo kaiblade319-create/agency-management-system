@@ -18,10 +18,11 @@ import {
 import { useForm, Controller, useFieldArray } from "react-hook-form";
 import {
   Plus, Trash2, FileText, ArrowRight, ChevronLeft, Save,
-  Building2, User, Package, Calculator, StickyNote, PenLine,
+  Building2, User, Package, Calculator, StickyNote, PenLine, Download,
 } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { openPrintWindow, buildQuotationHtml, type QuotationData } from "@/lib/pdf-print";
 
 const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
   DRAFT:    { label: "Draft",    className: "bg-slate-100 text-slate-600" },
@@ -814,6 +815,18 @@ export default function QuotationsPage() {
                             <ArrowRight className="h-3 w-3" /> Invoice
                           </Button>
                         )}
+                        <Button
+                          size="icon" variant="ghost" className="h-7 w-7"
+                          title="Download PDF"
+                          onClick={() => {
+                            openPrintWindow(
+                              buildQuotationHtml(row as unknown as QuotationData),
+                              `Quotation-${q.number ?? "draft"}`
+                            );
+                          }}
+                        >
+                          <Download className="h-3.5 w-3.5" />
+                        </Button>
                         <Button
                           size="icon" variant="ghost" className="h-7 w-7 text-destructive hover:text-destructive"
                           onClick={() => deleteMutation.mutate({ id: q.id })}

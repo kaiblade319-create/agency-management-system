@@ -19,7 +19,8 @@ import {
 import { Label } from "@/components/ui/label";
 import { TiptapEditor } from "@/components/ui/tiptap";
 import { useForm, Controller } from "react-hook-form";
-import { Plus, Trash2, ClipboardList, Pencil } from "lucide-react";
+import { Plus, Trash2, ClipboardList, Pencil, Download } from "lucide-react";
+import { openPrintWindow, buildProposalHtml, type ProposalPdfData } from "@/lib/pdf-print";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 
@@ -193,6 +194,19 @@ export default function ProposalsPage() {
                       <div className="flex items-center gap-1 justify-end">
                         <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => openEdit(p)}>
                           <Pencil className="h-3.5 w-3.5" />
+                        </Button>
+                        <Button
+                          size="icon" variant="ghost" className="h-7 w-7"
+                          title="Download PDF"
+                          onClick={() => {
+                            const clientName = (clients ?? []).find((c) => c.id === p.clientId)?.companyName ?? p.clientName;
+                            openPrintWindow(
+                              buildProposalHtml({ ...p, clientName } as ProposalPdfData),
+                              `Proposal-${p.title ?? "draft"}`
+                            );
+                          }}
+                        >
+                          <Download className="h-3.5 w-3.5" />
                         </Button>
                         <Button
                           size="icon" variant="ghost" className="h-7 w-7 text-destructive hover:text-destructive"
