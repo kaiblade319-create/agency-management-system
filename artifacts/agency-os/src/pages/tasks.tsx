@@ -21,7 +21,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useForm, Controller } from "react-hook-form";
 import { Plus, Trash2, Calendar, CheckSquare } from "lucide-react";
-import { format } from "date-fns";
+import { format, isBefore, parseISO, startOfDay } from "date-fns";
 import { cn } from "@/lib/utils";
 
 const COLUMNS = [
@@ -186,7 +186,12 @@ export default function TasksPage() {
                         draggable
                         onDragStart={() => setDragging(task.id)}
                         onDragEnd={() => setDragging(null)}
-                        className="bg-card rounded-lg border border-border p-3 shadow-sm cursor-grab active:cursor-grabbing group space-y-2"
+                        className={cn(
+                          "bg-card rounded-lg border p-3 shadow-sm cursor-grab active:cursor-grabbing group space-y-2",
+                          task.dueDate && task.status !== "DONE" && isBefore(parseISO(task.dueDate), startOfDay(new Date()))
+                            ? "border-rose-300 bg-rose-50/50 dark:bg-rose-950/10"
+                            : "border-border"
+                        )}
                         data-testid={`task-card-${task.id}`}
                       >
                         <div className="flex items-start justify-between gap-1.5">
@@ -210,9 +215,17 @@ export default function TasksPage() {
                             {pc.label}
                           </Badge>
                           {task.dueDate && (
-                            <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                            <div className={cn(
+                              "flex items-center gap-1 text-[10px]",
+                              task.status !== "DONE" && isBefore(parseISO(task.dueDate), startOfDay(new Date()))
+                                ? "text-rose-500 font-semibold"
+                                : "text-muted-foreground"
+                            )}>
                               <Calendar className="h-2.5 w-2.5" />
                               {format(new Date(task.dueDate), "dd MMM")}
+                              {task.status !== "DONE" && isBefore(parseISO(task.dueDate), startOfDay(new Date())) && (
+                                <span className="ml-0.5">· Overdue</span>
+                              )}
                             </div>
                           )}
                         </div>

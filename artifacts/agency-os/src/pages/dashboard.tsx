@@ -1,12 +1,12 @@
 import { useState } from "react";
 import {
   useGetDashboardStats,
-  useGetRevenueChart,
   useGetRecentActivity,
   useListTasks,
   useUpdateTask,
   getListTasksQueryKey
 } from "@workspace/api-client-react";
+import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/App";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -22,7 +22,14 @@ import {
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from "recharts";
-import { formatDistanceToNow, isToday, parseISO } from "date-fns";
+import { formatDistanceToNow, isToday, isBefore, parseISO } from "date-fns";
+
+const RANGE_OPTIONS = [
+  { key: "3m", label: "3M" },
+  { key: "6m", label: "6M" },
+  { key: "12m", label: "12M" },
+  { key: "ytd", label: "YTD" },
+];
 
 function StatCard({
   label, value, icon, trend, color = "primary",
@@ -52,8 +59,20 @@ function StatCard({
 export default function DashboardPage() {
   const { user } = useAuth();
   const qc = useQueryClient();
+  const [chartRange, setChartRange] = useState<string>("6m");
   const { data: stats, isLoading: statsLoading } = useGetDashboardStats();
-  const { data: revenueChart, isLoading: chartLoading } = useGetRevenueChart();
+  const { token } = useAuth();
+  const { data: revenueChart, isLoading: chartLoading } = useQuery<{ month: string; amount: number }[]>({
+    queryKey: ["revenue-chart", chartRange],
+    queryFn: async () => {
+      const res = await fetch(`/api/dashboard/revenue-chart?range=${chartRange}`, {
+        headers: { Authorization: `Bearer ${token ?? ""}` },
+      });
+      if (!res.ok) throw new Error("Failed to fetch revenue chart");
+      return res.json();
+    },
+    enabled: !!token,
+  });
   const { data: activity, isLoading: activityLoading } = useGetRecentActivity();
   const { data: allTasks, isLoading: tasksLoading } = useListTasks();
 
@@ -111,6 +130,9 @@ export default function DashboardPage() {
                 )}
                 {task.dueDate && isToday(parseISO(task.dueDate)) && (
                   <span className="text-[10px] font-semibold text-rose-500">Due Today</span>
+                )}
+                {task.dueDate && isBefore(parseISO(task.dueDate), new Date()) && !isToday(parseISO(task.dueDate)) && (
+                  <span className="text-[10px] font-semibold text-rose-600">Overdue</span>
                 )}
                 <span className="text-[10px] text-muted-foreground flex items-center gap-1">
                   <UserCircle2 className="h-3 w-3" /> Assigned by Admin
@@ -216,10 +238,25 @@ export default function DashboardPage() {
         {/* Revenue Chart */}
         <Card className="xl:col-span-1">
           <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <BarChart3 className="h-4 w-4 text-primary" />
-              Revenue Overview
-            </CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <BarChart3 className="h-4 w-4 text-primary" />
+                Revenue Overview
+              </CardTitle>
+              <div className="flex gap-1">
+                {RANGE_OPTIONS.map((opt) => (
+                  <Button
+                    key={opt.key}
+                    size="sm"
+                    variant={chartRange === opt.key ? "default" : "ghost"}
+                    className="h-6 px-2 text-[10px] font-semibold"
+                    onClick={() => setChartRange(opt.key)}
+                  >
+                    {opt.label}
+                  </Button>
+                ))}
+              </div>
+            </div>
           </CardHeader>
           <CardContent>
             {chartLoading ? (

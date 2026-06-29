@@ -36,16 +36,39 @@ router.get("/stats", asyncHandler(async (req, res) => {
 
 router.get("/revenue-chart", asyncHandler(async (req, res) => {
   const now = new Date();
+  // range: "3m" | "6m" | "12m" | "ytd" — default 6m
+  const range = (req.query.range as string) ?? "6m";
+
+  let monthCount = 6;
+  let startDate: Date;
+
+  if (range === "3m") {
+    monthCount = 3;
+    startDate = new Date(now.getFullYear(), now.getMonth() - 2, 1);
+  } else if (range === "12m") {
+    monthCount = 12;
+    startDate = new Date(now.getFullYear(), now.getMonth() - 11, 1);
+  } else if (range === "ytd") {
+    startDate = new Date(now.getFullYear(), 0, 1);
+    monthCount = now.getMonth() + 1;
+  } else {
+    // default 6m
+    monthCount = 6;
+    startDate = new Date(now.getFullYear(), now.getMonth() - 5, 1);
+  }
+
   const months: Record<string, number> = {};
-  for (let i = 5; i >= 0; i--) {
+  for (let i = monthCount - 1; i >= 0; i--) {
     const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
     months[d.toLocaleString("default", { month: "short", year: "2-digit" })] = 0;
   }
 
+  const startStr = startDate.toISOString().slice(0, 10);
+
   const invoices = await db
     .select({ invoiceDate: invoicesTable.invoiceDate, total: invoicesTable.total })
     .from(invoicesTable)
-    .where(eq(invoicesTable.status, "PAID"));
+    .where(and(eq(invoicesTable.status, "PAID"), gte(invoicesTable.invoiceDate, startStr)));
 
   for (const inv of invoices) {
     if (inv.invoiceDate) {

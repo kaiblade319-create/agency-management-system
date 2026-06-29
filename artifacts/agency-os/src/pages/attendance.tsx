@@ -17,8 +17,28 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
-import { MapPin, Clock, CheckCircle2, AlertTriangle, Users } from "lucide-react";
+import { Clock, CheckCircle2, AlertTriangle, Users, Download } from "lucide-react";
 import { format } from "date-fns";
+
+function exportAttendanceCSV(records: any[]) {
+  const headers = ["Date", "Employee", "Check In", "Check Out", "Overtime (min)", "Status"];
+  const rows = records.map((r) => [
+    r.date ?? format(new Date(r.checkInAt), "yyyy-MM-dd"),
+    r.userName ?? "",
+    r.checkInAt ? format(new Date(r.checkInAt), "HH:mm") : "",
+    r.checkOutAt ? format(new Date(r.checkOutAt), "HH:mm") : "",
+    r.overtimeMin ?? 0,
+    r.isLate ? "Late" : "On Time",
+  ]);
+  const csv = [headers, ...rows].map((row) => row.join(",")).join("\n");
+  const blob = new Blob([csv], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `attendance-${format(new Date(), "yyyy-MM")}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
 
 export default function AttendancePage() {
   const qc = useQueryClient();
@@ -78,6 +98,16 @@ export default function AttendancePage() {
             Daily check-in, live board & history logs
           </p>
         </div>
+        {isUserAdminOrManager && (attendanceHistory ?? []).length > 0 && (
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2"
+            onClick={() => exportAttendanceCSV(attendanceHistory ?? [])}
+          >
+            <Download className="h-4 w-4" /> Export CSV
+          </Button>
+        )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

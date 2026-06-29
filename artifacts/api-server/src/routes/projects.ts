@@ -31,6 +31,26 @@ router.post("/", asyncHandler(async (req, res) => {
   return res.status(201).json(row);
 }));
 
+router.get("/:id", asyncHandler(async (req, res) => {
+  const [row] = await db
+    .select({
+      id: projectsTable.id,
+      name: projectsTable.name,
+      status: projectsTable.status,
+      priority: projectsTable.priority,
+      clientId: projectsTable.clientId,
+      clientName: clientsTable.companyName,
+      startDate: projectsTable.startDate,
+      dueDate: projectsTable.dueDate,
+      description: projectsTable.description,
+    })
+    .from(projectsTable)
+    .leftJoin(clientsTable, eq(projectsTable.clientId, clientsTable.id))
+    .where(eq(projectsTable.id, (req.params.id as string)));
+  if (!row) throw createError("Not found", 404);
+  return res.json(row);
+}));
+
 router.patch("/:id", asyncHandler(async (req, res) => {
   const { id: _id, createdAt: _ts, ...body } = req.body;
   const [row] = await db
