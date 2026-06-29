@@ -24,6 +24,7 @@ export const clientsTable = pgTable("clients", {
   websiteFeatures: text("website_features"),
   cmsPreference: text("cms_preference"),
   budgetRange: text("budget_range"),
+  logoUrl: text("logo_url"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

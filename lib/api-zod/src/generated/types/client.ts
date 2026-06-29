@@ -33,4 +33,6 @@ export interface Client {
   contentFrequency?: string | null;
   /** @nullable */
   targetAudience?: string | null;
+  /** @nullable */
+  logoUrl?: string | null;
 }

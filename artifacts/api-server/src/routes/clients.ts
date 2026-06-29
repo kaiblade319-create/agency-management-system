@@ -5,6 +5,31 @@ import { eq, ilike, or, and } from "drizzle-orm";
 import { asyncHandler } from "../lib/asyncHandler";
 import { createError } from "../middleware/errorHandler";
 
+function calcHealthScore(invoices: { status: string | null; dueDate: string | null }[]): string {
+  const now = new Date();
+  const overdueInvs = invoices.filter(inv => inv.status === "OVERDUE");
+  const sentWithPastDue = invoices.filter(inv => {
+    if (inv.status !== "SENT" || !inv.dueDate) return false;
+    return new Date(inv.dueDate) < now;
+  });
+  const allProblematic = [...overdueInvs, ...sentWithPastDue];
+
+  if (allProblematic.length === 0) return "GREEN";
+
+  const maxDaysOverdue = Math.max(
+    ...allProblematic.map(inv => {
+      if (!inv.dueDate) return 0;
+      return Math.floor((now.getTime() - new Date(inv.dueDate).getTime()) / (1000 * 60 * 60 * 24));
+    }),
+  );
+
+  const overdueRatio = allProblematic.length / Math.max(invoices.length, 1);
+
+  if (maxDaysOverdue > 60 || overdueRatio > 0.5) return "RED";
+  if (maxDaysOverdue > 15 || overdueRatio > 0.2) return "YELLOW";
+  return "GREEN";
+}
+
 const router = Router();
 
 router.get("/", asyncHandler(async (req, res) => {
@@ -55,6 +80,26 @@ router.patch("/:id", asyncHandler(async (req, res) => {
 router.delete("/:id", asyncHandler(async (req, res) => {
   await db.delete(clientsTable).where(eq(clientsTable.id, (req.params.id as string)));
   return res.status(204).send();
+}));
+
+router.post("/:id/recalculate-health", asyncHandler(async (req, res) => {
+  const clientId = req.params.id as string;
+  const [client] = await db.select().from(clientsTable).where(eq(clientsTable.id, clientId));
+  if (!client) throw createError("Not found", 404);
+
+  const invoices = await db
+    .select({ status: invoicesTable.status, dueDate: invoicesTable.dueDate })
+    .from(invoicesTable)
+    .where(eq(invoicesTable.clientId, clientId));
+
+  const health = calcHealthScore(invoices);
+  const [updated] = await db
+    .update(clientsTable)
+    .set({ health })
+    .where(eq(clientsTable.id, clientId))
+    .returning();
+
+  return res.json({ health, client: updated });
 }));
 
 router.get("/:id/contracts", asyncHandler(async (req, res) => {

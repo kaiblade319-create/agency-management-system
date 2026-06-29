@@ -46,4 +46,6 @@ export interface ClientInput {
   cmsPreference?: string | null;
   /** @nullable */
   budgetRange?: string | null;
+  /** @nullable */
+  logoUrl?: string | null;
 }

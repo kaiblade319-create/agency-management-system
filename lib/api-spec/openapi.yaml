@@ -1477,6 +1477,8 @@ components:
           type: ["string", "null"]
         targetAudience:
           type: ["string", "null"]
+        logoUrl:
+          type: ["string", "null"]
 
     ClientInput:
       type: object
@@ -1521,6 +1523,8 @@ components:
         cmsPreference:
           type: ["string", "null"]
         budgetRange:
+          type: ["string", "null"]
+        logoUrl:
           type: ["string", "null"]
 
     Contract:

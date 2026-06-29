@@ -12,6 +12,7 @@ export * from "./leaves";
 export * from "./settings";
 
 export * from "./purchaseOrders";
+export * from "./activityLogs";
 
 export { usersTable as users } from "./users";
 export { clientsTable as clients } from "./clients";

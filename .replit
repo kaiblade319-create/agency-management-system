@@ -9,6 +9,44 @@ args = ["pnpm", "store", "prune"]
 env = { "CI" = "true" }
 
 [workflows]
+runButton = "Project"
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Start application"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "API Server"
+
+[[workflows.workflow]]
+name = "Start application"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "pnpm --filter @workspace/agency-os run dev --host 0.0.0.0 --port 5000"
+waitForPort = 5000
+
+[workflows.workflow.metadata]
+outputType = "webview"
+
+[[workflows.workflow]]
+name = "API Server"
+author = "agent"
+
+[workflows.workflow.metadata]
+outputType = "console"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "PORT=8080 pnpm --filter @workspace/api-server run dev"
+waitForPort = 8080
 
 [agent]
 stack = "BEST_EFFORT_FALLBACK"
@@ -19,12 +57,12 @@ path = "scripts/post-merge.sh"
 timeoutMs = 45000
 
 [[ports]]
-localPort = 8080
+localPort = 5000
 externalPort = 80
 
 [[ports]]
-localPort = 21486
-externalPort = 3000
+localPort = 8080
+externalPort = 8080
 
 [nix]
 channel = "stable-25_05"

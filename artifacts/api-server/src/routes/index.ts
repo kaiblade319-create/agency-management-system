@@ -17,6 +17,7 @@ import settingsRouter from "./settings";
 import purchaseOrdersRouter from "./purchase-orders";
 import socialAccountsRouter from "./social-accounts";
 import uploadsRouter from "./uploads";
+import activityLogsRouter from "./activityLogs";
 import { requireAuth } from "../middleware/auth";
 
 const router: IRouter = Router();
@@ -42,5 +43,6 @@ router.use(settingsRouter);
 router.use("/purchase-orders", purchaseOrdersRouter);
 router.use("/social-accounts", socialAccountsRouter);
 router.use("/uploads", uploadsRouter);
+router.use(activityLogsRouter);
 
 export default router;

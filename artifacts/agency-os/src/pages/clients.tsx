@@ -21,7 +21,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useForm, Controller } from "react-hook-form";
-import { Plus, Search, Phone, Mail, Building2, Trash2, Pencil, UploadCloud } from "lucide-react";
+import { Plus, Search, Phone, Mail, Building2, Trash2, Pencil } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const HEALTH_MAP: Record<string, { label: string; className: string }> = {
@@ -219,11 +219,22 @@ export default function ClientsPage() {
               <Card key={c.id} className="scale-hover">
                 <CardContent className="p-5">
                   <div className="flex items-start justify-between gap-2 mb-3">
-                    <Link href={`/clients/${c.id}`}>
-                      <a className="font-semibold text-foreground hover:text-primary transition-colors line-clamp-1">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      {/* Logo / Avatar */}
+                      <div className={cn(
+                        "h-9 w-9 rounded-xl border border-border overflow-hidden flex items-center justify-center shrink-0 text-xs font-bold",
+                        c.logoUrl ? "" : "bg-gradient-to-br from-primary/20 to-primary/5 text-primary"
+                      )}>
+                        {c.logoUrl ? (
+                          <img src={c.logoUrl} alt={c.companyName} className="h-full w-full object-cover" />
+                        ) : (
+                          c.companyName.split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase()
+                        )}
+                      </div>
+                      <Link href={`/clients/${c.id}`} className="font-semibold text-foreground hover:text-primary transition-colors line-clamp-1">
                         {c.companyName}
-                      </a>
-                    </Link>
+                      </Link>
+                    </div>
                     <div className="flex items-center gap-1 shrink-0">
                       <Button
                         size="icon"

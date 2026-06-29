@@ -1,10 +1,11 @@
-# [Project name]
+# AgencyOS
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+All-in-one agency management platform for managing clients, projects, tasks, invoices, leads, content, HR, and more.
 
 ## Run & Operate
 
-- `pnpm --filter @workspace/api-server run dev` — run the API server (port 5000)
+- `pnpm --filter @workspace/agency-os run dev -- --host 0.0.0.0 --port 5000` — run the frontend (port 5000)
+- `pnpm --filter @workspace/api-server run dev` — run the API server (port 8080)
 - `pnpm run typecheck` — full typecheck across all packages
 - `pnpm run build` — typecheck + build all packages
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
@@ -22,23 +23,36 @@ _Replace the heading above with the project's name, and this line with one sente
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- DB schema: `lib/db/src/schema/` (source of truth for all tables)
+- API contract: `lib/api-spec/openapi.yaml` (source of truth for all API shapes)
+- Generated React hooks: `lib/api-client-react/src/generated/`
+- Generated Zod schemas: `lib/api-zod/src/generated/`
+- Frontend pages: `artifacts/agency-os/src/pages/`
+- API routes: `artifacts/api-server/src/routes/`
+- File uploads stored in: `artifacts/api-server/uploads/` (served at `/api/uploads/`)
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- Orval codegen from OpenAPI → both React hooks and Zod schemas; when codegen fails (Node version issue), update generated files in `lib/api-client-react/src/generated/api.schemas.ts` and `lib/api-zod/src/generated/types/` manually
+- Vite proxies `/api` → Express on port 8080
+- File uploads: POST multipart to `/api/uploads`, returns `{ url }`, then PATCH the resource with the URL
+- Wouter routing: `Link` must NOT wrap `<a>` — use `<Link href="..." className="...">text</Link>` directly
 
 ## Product
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+Modules: Clients, Projects, Tasks (Kanban), Content Calendar, Invoices, Quotations, Proposals, Purchase Orders, Leads/Sales, HR (Attendance + Leave), Users/Team, Agency Settings, Client Portal.
 
 ## User preferences
 
-_Populate as you build — explicit user instructions worth remembering across sessions._
+- Build features one by one from the feature list, push to GitHub after each one completes
+- GitHub push: `bash push-to-github.sh` (requires GITHUB_TOKEN secret set in Replit Secrets)
 
 ## Gotchas
 
-_Populate as you build — sharp edges, "always run X before Y" rules._
+- `pnpm install` from repo root times out in Replit agent shell; use `pnpm add --filter @workspace/xxx` per package instead
+- `drizzle-kit` binary is at `lib/db/node_modules/.bin/drizzle-kit` — run DB push from `lib/db/` dir: `node_modules/.bin/drizzle-kit push --config ./drizzle.config.ts`
+- Orval codegen fails with Node 20 (`js-yaml` ESM issue) — update generated files manually in `lib/api-client-react/src/generated/api.schemas.ts` and `lib/api-zod/src/generated/types/`
+- After `pnpm store prune`, run `pnpm add --filter @workspace/agency-os @base-ui/react` to restore the package (pnpm store was corrupted)
 
 ## Pointers
 

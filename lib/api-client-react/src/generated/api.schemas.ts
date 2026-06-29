@@ -113,6 +113,8 @@ export interface Client {
   contentFrequency?: string | null;
   /** @nullable */
   targetAudience?: string | null;
+  /** @nullable */
+  logoUrl?: string | null;
 }
 
 export interface ClientInput {
@@ -155,6 +157,8 @@ export interface ClientInput {
   cmsPreference?: string | null;
   /** @nullable */
   budgetRange?: string | null;
+  /** @nullable */
+  logoUrl?: string | null;
 }
 
 export interface Contract {
